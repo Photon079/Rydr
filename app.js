@@ -23,6 +23,39 @@ const state = {
 const ROUTE_COLORS = ['#3B82F6', '#A78BFA', '#34D399'];
 const BASE_CONSUMPTION = 0.15; // kWh/km
 const BATTERY_CAPACITY = 1.5; // kWh
+
+// ── Input Validation & Security ──────────────────────────────
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return input;
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/[<>'"]/g, char => {
+      const entities = { '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+      return entities[char] || char;
+    });
+}
+
+function validateBattery(battery) {
+  const num = parseFloat(battery);
+  if (isNaN(num) || num < 0 || num > 100) {
+    throw new Error('Battery must be between 0 and 100%');
+  }
+  return num;
+}
+
+function validateCoordinates(lat, lng) {
+  const latitude = parseFloat(lat);
+  const longitude = parseFloat(lng);
+  
+  if (isNaN(latitude) || latitude < -90 || latitude > 90) {
+    throw new Error('Invalid latitude. Must be between -90 and 90');
+  }
+  if (isNaN(longitude) || longitude < -180 || longitude > 180) {
+    throw new Error('Invalid longitude. Must be between -180 and 180');
+  }
+  
+  return { lat: latitude, lng: longitude };
+}
 const LOW_BATTERY_THRESHOLD = 15; // %
 
 // ── Data Loading ──────────────────────────────────────────────

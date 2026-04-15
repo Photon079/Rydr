@@ -6,6 +6,25 @@
   <title>Rydr — EV Range + Battery Swap Optimizer · Bangalore</title>
   <meta name="description" content="Rydr helps electric two-wheeler delivery riders in Bangalore plan smart routes with battery-aware routing, auto swap station insertion, and earnings impact analysis.">
 
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+    
+    // Track route calculations
+    function trackEvent(category, action, label) {
+      if (typeof gtag !== 'undefined') {
+        gtag('event', action, {
+          'event_category': category,
+          'event_label': label
+        });
+      }
+    }
+  </script>
+
   <!-- Leaflet.js Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
