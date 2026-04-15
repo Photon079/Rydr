@@ -1,0 +1,11 @@
+{
+  "name": "rydr",
+  "version": "1.0.0",
+  "description": "EV Range + Battery Swap Optimizer for delivery riders in Bangalore",
+  "scripts": {
+    "start": "npx -y serve .",
+    "dev": "npx -y serve ."
+  },
+  "keywords": ["ev", "battery", "swap", "routing", "bangalore"],
+  "license": "MIT"
+}

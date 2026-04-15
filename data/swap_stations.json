@@ -1,0 +1,272 @@
+[
+  {
+    "id": "ss_01",
+    "name": "Indofast Swap — JP Nagar",
+    "lat": 12.9081,
+    "lng": 77.5850,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_02",
+    "name": "Sun Mobility — BTM Layout",
+    "lat": 12.9166,
+    "lng": 77.6101,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_03",
+    "name": "Indofast Swap — Bannerghatta Rd",
+    "lat": 12.8956,
+    "lng": 77.5993,
+    "status": "busy",
+    "swap_time_min": 4,
+    "capacity": 6
+  },
+  {
+    "id": "ss_04",
+    "name": "Sun Mobility — Silk Board",
+    "lat": 12.9175,
+    "lng": 77.6229,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 12
+  },
+  {
+    "id": "ss_05",
+    "name": "Indofast Swap — Koramangala",
+    "lat": 12.9352,
+    "lng": 77.6245,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_06",
+    "name": "Sun Mobility — HSR Layout",
+    "lat": 12.9116,
+    "lng": 77.6389,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 6
+  },
+  {
+    "id": "ss_07",
+    "name": "Indofast Swap — Arekere",
+    "lat": 12.8790,
+    "lng": 77.5965,
+    "status": "free",
+    "swap_time_min": 5,
+    "capacity": 4
+  },
+  {
+    "id": "ss_08",
+    "name": "Sun Mobility — Uttarahalli",
+    "lat": 12.8844,
+    "lng": 77.5636,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_09",
+    "name": "Indofast Swap — Kanakapura Jn",
+    "lat": 12.8697,
+    "lng": 77.5741,
+    "status": "busy",
+    "swap_time_min": 4,
+    "capacity": 6
+  },
+  {
+    "id": "ss_10",
+    "name": "Sun Mobility — JP Nagar 6th",
+    "lat": 12.9044,
+    "lng": 77.5816,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 8
+  },
+  {
+    "id": "ss_11",
+    "name": "Indofast Swap — Indiranagar",
+    "lat": 12.9716,
+    "lng": 77.6412,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_12",
+    "name": "Sun Mobility — Whitefield",
+    "lat": 12.9698,
+    "lng": 77.7499,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 12
+  },
+  {
+    "id": "ss_13",
+    "name": "Indofast Swap — Electronic City",
+    "lat": 12.8456,
+    "lng": 77.6603,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_14",
+    "name": "Sun Mobility — Marathahalli",
+    "lat": 12.9591,
+    "lng": 77.6974,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_15",
+    "name": "Indofast Swap — Jayanagar",
+    "lat": 12.9250,
+    "lng": 77.5838,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_16",
+    "name": "Sun Mobility — Yelahanka",
+    "lat": 13.1007,
+    "lng": 77.5963,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_17",
+    "name": "Indofast Swap — Hebbal",
+    "lat": 13.0358,
+    "lng": 77.5970,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_18",
+    "name": "Sun Mobility — Malleshwaram",
+    "lat": 13.0033,
+    "lng": 77.5703,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_19",
+    "name": "Indofast Swap — Rajajinagar",
+    "lat": 12.9916,
+    "lng": 77.5553,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_20",
+    "name": "Sun Mobility — Yeshwanthpur",
+    "lat": 13.0280,
+    "lng": 77.5385,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_21",
+    "name": "Indofast Swap — Banashankari",
+    "lat": 12.9250,
+    "lng": 77.5480,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_22",
+    "name": "Sun Mobility — Basavanagudi",
+    "lat": 12.9423,
+    "lng": 77.5742,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_23",
+    "name": "Indofast Swap — Sarjapur Road",
+    "lat": 12.9121,
+    "lng": 77.6869,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_24",
+    "name": "Sun Mobility — Bellandur",
+    "lat": 12.9259,
+    "lng": 77.6766,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_25",
+    "name": "Indofast Swap — Bommanahalli",
+    "lat": 12.9067,
+    "lng": 77.6270,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_26",
+    "name": "Sun Mobility — KR Puram",
+    "lat": 13.0050,
+    "lng": 77.6960,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_27",
+    "name": "Indofast Swap — Majestic",
+    "lat": 12.9767,
+    "lng": 77.5713,
+    "status": "busy",
+    "swap_time_min": 4,
+    "capacity": 12
+  },
+  {
+    "id": "ss_28",
+    "name": "Sun Mobility — MG Road",
+    "lat": 12.9750,
+    "lng": 77.6069,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  },
+  {
+    "id": "ss_29",
+    "name": "Indofast Swap — Vijayanagar",
+    "lat": 12.9698,
+    "lng": 77.5320,
+    "status": "free",
+    "swap_time_min": 4,
+    "capacity": 8
+  },
+  {
+    "id": "ss_30",
+    "name": "Sun Mobility — RT Nagar",
+    "lat": 13.0196,
+    "lng": 77.5969,
+    "status": "free",
+    "swap_time_min": 3,
+    "capacity": 10
+  }
+]

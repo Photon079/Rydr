@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rydr — EV Range + Battery Swap Optimizer · Bangalore</title>
+  <meta name="description" content="Rydr helps electric two-wheeler delivery riders in Bangalore plan smart routes with battery-aware routing, auto swap station insertion, and earnings impact analysis.">
+
+  <!-- Leaflet.js Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Loading Screen ── -->
+<div id="app-loading" style="
+  position:fixed;inset:0;background:#060D1A;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="width:56px;height:56px;background:linear-gradient(135deg,#2563EB,#16A34A);border-radius:16px;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(37,99,235,0.4);">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+      <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+    </svg>
+  </div>
+  <div style="font-family:Outfit,sans-serif;font-size:1.6rem;font-weight:800;
+    background:linear-gradient(135deg,#60A5FA,#34D399);-webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;background-clip:text;">Rydr</div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <div style="width:8px;height:8px;border-radius:50%;background:#2563EB;animation:spin 1s ease infinite;"></div>
+    <span style="font-size:0.8rem;color:#7B90B2;font-family:Inter,sans-serif">Loading Bangalore road network…</span>
+  </div>
+</div>
+
+<!-- ── Aurora Background ── -->
+<div class="aurora-bg" aria-hidden="true"></div>
+
+<!-- ── App Shell ── -->
+<div id="app-wrapper" class="app-wrapper hidden">
+
+  <!-- ── Top Navigation ── -->
+  <nav class="top-nav" aria-label="Rydr navigation">
+    <a href="#" class="nav-logo" aria-label="Rydr home">
+      <div class="nav-logo-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+      </div>
+      <span class="nav-logo-text">Rydr</span>
+      <span class="nav-tagline">EV Optimizer · BLR</span>
+    </a>
+    <div class="nav-actions">
+      <span class="nav-badge hackathon">⚡ PromptWars 2026</span>
+      <span class="nav-badge version">DSU × Hack2Skill</span>
+      <!-- Protected Rating badge (hidden until breakdown) -->
+      <span id="protected-badge" class="protected-badge hidden" role="status">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        Rating Protected
+      </span>
+    </div>
+  </nav>
+
+  <!-- ── Sidebar / Control Panel ── -->
+  <aside class="sidebar" aria-label="Route planner controls">
+
+    <!-- ── Route Planner ── -->
+    <div class="panel-section">
+      <div class="section-label">Route Planner</div>
+
+      <div class="form-field" style="position:relative">
+        <label class="field-label" for="input-start">Start Location</label>
+        <input type="text" id="input-start" class="field-input" placeholder="e.g. Koramangala, Bangalore"
+               autocomplete="off" spellcheck="false" aria-label="Start location" aria-autocomplete="list"/>
+        <div id="suggestions-start" class="suggestions-dropdown hidden"></div>
+      </div>
+
+      <div class="form-field" style="position:relative">
+        <label class="field-label" for="input-end">Destination</label>
+        <input type="text" id="input-end" class="field-input" placeholder="e.g. Silk Board, Bangalore"
+               autocomplete="off" spellcheck="false" aria-label="Destination" aria-autocomplete="list"/>
+        <div id="suggestions-end" class="suggestions-dropdown hidden"></div>
+      </div>
+
+      <div class="form-field">
+        <label class="field-label" for="battery-slider">Current Battery Level</label>
+        <div class="battery-row">
+          <input type="range" id="battery-slider" class="battery-slider"
+                 min="5" max="100" value="60" step="1"
+                 aria-label="Battery percentage" aria-valuemin="5" aria-valuemax="100">
+          <span id="battery-val" class="battery-value">60%</span>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label-text" id="rain-label">
+          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm8-11V5c0-.55-.45-1-1-1h-2c-.55 0-1 .45-1 1v3H8V5c0-1.66 1.34-3 3-3h2c1.66 0 3 1.34 3 3v3h-2z"/></svg>
+          Rain Conditions
+        </span>
+        <label class="toggle-switch" aria-label="Toggle rain conditions">
+          <input type="checkbox" id="rain-toggle" role="switch" aria-checked="false">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <button id="btn-route" class="btn btn-primary" aria-label="Find optimal routes">
+        <span class="spinner hidden"></span>
+        <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
+        <span class="btn-text">Find Routes</span>
+      </button>
+    </div>
+
+    <!-- ── Route Results ── -->
+    <div id="routes-section" class="panel-section hidden">
+      <div class="section-label">Route Options</div>
+      <div id="routes-list" role="list" aria-label="Computed route options"></div>
+    </div>
+
+    <!-- ── LLM Explanation ── -->
+    <div id="llm-section" class="panel-section hidden">
+      <div id="llm-card" class="llm-card">
+        <div class="llm-label">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+          AI Route Insight
+        </div>
+        <div id="llm-loading" class="llm-loading">
+          <div class="spinner" style="border-top-color:#60A5FA;border-color:rgba(96,165,250,0.2)"></div>
+          Asking Claude…
+        </div>
+        <p id="llm-text" class="llm-text hidden"></p>
+      </div>
+    </div>
+
+    <!-- ── Earnings Impact ── -->
+    <div class="panel-section hidden">
+      <div class="section-label">Earnings Impact</div>
+      <div class="earnings-row">
+        <span class="earnings-label">Swap Incidents</span>
+        <span id="earnings-incidents" class="earnings-val">0</span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-label">Per Incident Loss</span>
+        <span id="earnings-per" class="earnings-val zero">₹0</span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-label">Total Session Loss</span>
+        <span id="earnings-lost" class="earnings-val zero">₹0</span>
+      </div>
+    </div>
+
+    <!-- ── Emergency SOS ── -->
+    <div class="panel-section">
+      <div class="section-label">Emergency SOS</div>
+      <button id="btn-breakdown" class="btn btn-danger" aria-label="Emergency SOS">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        Emergency SOS
+      </button>
+      <div style="font-size:0.72rem;color:#7b90b2;margin-top:8px;line-height:1.4">
+        Call EV mechanic or ambulance + auto-reroute delivery
+      </div>
+      <div id="breakdown-panel" class="hidden"></div>
+      <div id="riders-list" class="hidden"></div>
+      <div id="transfer-notification" class="hidden"></div>
+    </div>
+
+    <!-- ── Map Legend ── -->
+    <div class="panel-section">
+      <div class="section-label">Map Legend</div>
+      <div style="display:flex;flex-direction:column;gap:7px;font-size:0.75rem">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:24px;height:4px;background:#3B82F6;border-radius:2px"></div>
+          <span style="color:var(--text-muted)">Selected route</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:24px;height:4px;background:#F87171;border-radius:2px"></div>
+          <span style="color:var(--text-muted)">High pothole (score ≥7)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:24px;height:4px;background:#60A5FA;border-radius:2px;border:1px dashed #60A5FA"></div>
+          <span style="color:var(--text-muted)">Rain-prone segment</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;background:#4ADE80;border-radius:50%;border:2px solid white"></div>
+          <span style="color:var(--text-muted)">Swap station (free)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;background:#FBBF24;border-radius:50%;border:2px solid white"></div>
+          <span style="color:var(--text-muted)">Swap station (busy)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:14px;height:14px;background:#6B7280;border-radius:50%;border:2px solid white"></div>
+          <span style="color:var(--text-muted)">Swap station (offline)</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── Map Panel ── -->
+  <main class="map-panel" aria-label="Interactive route map">
+    <div id="map" role="region" aria-label="Bangalore road map showing routes and swap stations"></div>
+  </main>
+
+</div><!-- /app-wrapper -->
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
