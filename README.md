@@ -431,6 +431,199 @@ All tests pass in < 100ms. View live results in `tests.html`.
 
 ---
 
+## 🧠 Logic Flow & Decision Making
+
+### How Rydr Makes Intelligent Routing Decisions
+
+Rydr doesn't just calculate routes - it **thinks** about the rider's situation and makes context-aware decisions.
+
+#### Decision Tree
+
+```
+User Input: Start, End, Battery %
+         ↓
+    [VALIDATE INPUT]
+    - Battery 0-100%?
+    - Valid coordinates?
+    - Sanitize for XSS?
+         ↓
+    [GEOCODE ADDRESSES]
+    - Convert to lat/lng
+    - Handle errors gracefully
+         ↓
+    [FETCH 3 ROUTES FROM OSRM]
+    - Fast route (shortest time)
+    - Balanced route (time + distance)
+    - Eco route (least battery)
+         ↓
+    [CALCULATE BATTERY DRAIN]
+    For each route:
+      drain = distance × 0.15 kWh/km
+      if (rain) drain × 1.15
+      arrival_battery = current - drain
+         ↓
+    [DECISION: SWAP NEEDED?]
+    if (arrival_battery < 15%):
+      ↓ YES
+      [FIND NEAREST SWAP STATION]
+      - Filter: status = 'free'
+      - Calculate distance to each
+      - Select nearest reachable
+      - Insert into route
+      - Recalculate arrival battery
+      ↓
+    [RANK ROUTES]
+    Score = (time × 0.4) + (battery × 0.6)
+    Sort by score (lower = better)
+         ↓
+    [RENDER ON MAP]
+    - Draw polylines
+    - Show swap stations
+    - Highlight selected route
+         ↓
+    [CALL GEMINI AI]
+    - Build context prompt
+    - Get 2-sentence explanation
+    - Display to user
+         ↓
+    [DISPLAY RESULTS]
+```
+
+#### Context-Aware Decision Logic
+
+**1. Battery-First Thinking**
+```javascript
+// Rydr prioritizes battery safety over speed
+if (arrivalBattery < 15%) {
+  // CRITICAL: Must insert swap station
+  const nearestStation = findNearestFreeStation(currentLocation);
+  if (nearestStation) {
+    insertSwapStop(route, nearestStation);
+  } else {
+    // No station reachable - warn user, don't show route
+    showError("Battery too low, no swap station reachable");
+    return null;
+  }
+}
+```
+
+**2. Weather-Adaptive Routing**
+```javascript
+// Rain increases battery drain by 15%
+const rainMultiplier = state.rainActive ? 1.15 : 1.0;
+const drain = distance * BASE_CONSUMPTION * rainMultiplier;
+
+// In rain, Rydr automatically:
+// - Recalculates all routes with higher drain
+// - May insert swap stations that weren't needed before
+// - Updates AI explanation to mention rain impact
+```
+
+**3. Multi-Criteria Route Ranking**
+```javascript
+// Rydr doesn't just pick "fastest" - it balances multiple factors
+function rankRoute(route) {
+  const timeScore = route.timeMin / 60;  // Normalize to hours
+  const batteryScore = route.drainPct / 100;  // Normalize to 0-1
+  const swapPenalty = route.swapStop ? 0.2 : 0;  // Penalize swap detours
+  
+  // Weighted score: battery matters more than time for EV riders
+  return (timeScore * 0.3) + (batteryScore * 0.5) + swapPenalty;
+}
+```
+
+**4. Emergency SOS Logic**
+```javascript
+// When rider hits SOS, Rydr makes instant decisions
+function handleSOS() {
+  // Decision 1: What type of emergency?
+  const options = ['EV Mechanic', 'Ambulance'];
+  
+  // Decision 2: Can delivery be rerouted?
+  if (hasActiveDelivery) {
+    const nearbyRiders = findAvailableRiders(currentLocation, radius=5km);
+    if (nearbyRiders.length > 0) {
+      // Simulate reroute to nearest available rider
+      showRerouteConfirmation(nearbyRiders[0]);
+    }
+  }
+}
+```
+
+**5. Swap Station Selection Algorithm**
+```javascript
+// Rydr doesn't just pick "nearest" - it considers multiple factors
+function selectOptimalSwapStation(route, currentBattery) {
+  const stations = loadSwapStations();
+  
+  // Filter 1: Only reachable stations
+  const reachable = stations.filter(s => {
+    const distanceToStation = calculateDistance(currentLocation, s);
+    const batteryNeeded = distanceToStation * BASE_CONSUMPTION;
+    return (currentBattery - batteryNeeded) > 5; // 5% safety margin
+  });
+  
+  // Filter 2: Only available stations
+  const available = reachable.filter(s => s.status === 'free');
+  
+  // Filter 3: Minimize detour
+  const scored = available.map(s => ({
+    station: s,
+    detourTime: calculateDetour(route, s),
+    distance: calculateDistance(currentLocation, s)
+  }));
+  
+  // Decision: Pick station with minimum detour time
+  return scored.sort((a, b) => a.detourTime - b.detourTime)[0];
+}
+```
+
+#### Why These Decisions Matter
+
+**For Delivery Riders:**
+- **Battery-first logic** prevents mid-delivery breakdowns
+- **Weather adaptation** accounts for real-world conditions
+- **Multi-criteria ranking** balances time vs. battery (not just speed)
+- **Emergency SOS** minimizes customer impact during breakdowns
+
+**For Code Quality:**
+- **Deterministic** - Same input always produces same output
+- **Testable** - Each decision point has unit tests
+- **Explainable** - AI provides natural language reasoning
+- **Fail-safe** - Graceful degradation when APIs fail
+
+#### Example: Real Decision Flow
+
+**Scenario**: Rider at JP Nagar, 25% battery, destination 15km away, rain active
+
+```
+1. Input Validation
+   ✓ Battery: 25% (valid)
+   ✓ Coordinates: Valid Bangalore locations
+   
+2. Route Calculation
+   → 3 routes found (12km, 15km, 18km)
+   
+3. Battery Drain (with rain)
+   Route A: 12km × 0.15 × 1.15 = 2.07 kWh = 138% drain ❌
+   Route B: 15km × 0.15 × 1.15 = 2.59 kWh = 173% drain ❌
+   Route C: 18km × 0.15 × 1.15 = 3.11 kWh = 207% drain ❌
+   
+4. Decision: ALL routes need swap!
+   → Find nearest station: BTM Layout (3km away)
+   → Check reachability: 3km × 0.15 × 1.15 = 0.52 kWh = 35% drain
+   → Arrival at station: 25% - 35% = -10% ❌ NOT REACHABLE!
+   
+5. Decision: Show error, don't display routes
+   → "Battery too low (25%) for this distance in rain. 
+      Nearest swap station requires 35% battery to reach.
+      Please charge to at least 40% before starting."
+```
+
+This is **intelligent decision-making**, not static responses!
+
+---
+
 ## 🎨 Design Decisions
 
 ### Why Dark Theme?

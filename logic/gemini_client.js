@@ -8,26 +8,73 @@
 const GEMINI_MODEL = 'gemini-2.0-flash';
 
 /**
- * Build a concise prompt summarising the top route.
+ * Build a context-aware prompt that adapts to route conditions
+ * The prompt changes based on:
+ * - Battery level (critical, low, good)
+ * - Rain conditions
+ * - Swap station requirement
+ * - Route risk level
  */
 function buildPrompt(route, rain, battery) {
-  const swapNote = route.swapStop
-    ? `A battery swap stop at "${route.swapStop.station.name}" adds ${route.swapStop.detourMin} minutes.`
-    : 'No swap stop needed.';
+  // Determine battery status
+  const batteryStatus = battery < 20 ? 'critically low' : 
+                       battery < 40 ? 'low' : 
+                       battery < 70 ? 'moderate' : 'good';
+  
+  // Determine arrival status
+  const arrivalStatus = route.arrivalBat < 15 ? 'CRITICAL - requires swap' :
+                       route.arrivalBat < 30 ? 'LOW - risky' :
+                       route.arrivalBat < 50 ? 'MODERATE' : 'SAFE';
+  
+  // Build swap context
+  const swapContext = route.swapStop
+    ? `A battery swap at "${route.swapStop.station.name}" is REQUIRED, adding ${route.swapStop.detourMin} minutes. This is not optional - you will not reach destination otherwise.`
+    : route.arrivalBat < 30
+    ? 'No swap needed but arrival battery is low - consider charging after delivery.'
+    : 'No swap needed - sufficient battery for this trip.';
+  
+  // Build weather context
+  const weatherContext = rain
+    ? 'Rain is ACTIVE - battery drain increased by 15%. Roads may be slippery, ride carefully.'
+    : 'Weather is clear - normal battery consumption expected.';
+  
+  // Build risk context
+  const riskContext = route.risk === 'high'
+    ? 'This route has HIGH RISK due to low arrival battery or long distance.'
+    : route.risk === 'medium'
+    ? 'This route has MEDIUM RISK - monitor battery closely.'
+    : 'This route is LOW RISK - safe battery margins.';
 
-  return `You are a helpful assistant for EV delivery riders in Bangalore.
-The best route is "${route.label}": ${route.distKm} km, ${route.timeMin} min, uses ${route.drainPct.toFixed(1)}% battery, leaving ${route.arrivalBat.toFixed(1)}% on arrival. Risk: ${route.risk}. ${swapNote} Rain is ${rain ? 'ON' : 'OFF'}. Starting battery: ${battery}%.
-In exactly 2 sentences, explain why this route is recommended and what the rider should watch out for.`;
+  return `You are an AI assistant for EV delivery riders in Bangalore. Analyze this route and provide actionable advice.
+
+ROUTE: "${route.label}"
+- Distance: ${route.distKm} km
+- Time: ${route.timeMin} minutes
+- Battery drain: ${route.drainPct.toFixed(1)}%
+- Starting battery: ${battery}% (${batteryStatus})
+- Arrival battery: ${route.arrivalBat.toFixed(1)}% (${arrivalStatus})
+- Risk level: ${route.risk.toUpperCase()}
+
+CONTEXT:
+- ${weatherContext}
+- ${swapContext}
+- ${riskContext}
+
+TASK: In exactly 2 sentences, explain:
+1. WHY this route is recommended (or why it's risky)
+2. WHAT the rider should watch out for (specific, actionable advice)
+
+Be direct and practical. Focus on battery management and safety.`;
 }
 
 /**
- * Call Google Gemini API and return a natural language explanation.
+ * Call Google Gemini API with dynamic, context-aware prompts
  * Returns null on any failure — callers must handle gracefully.
  *
- * @param {object} route
- * @param {boolean} rain
- * @param {number}  battery
- * @param {string}  apiKey   Google AI Studio API key
+ * @param {object} route - Route object with distance, time, battery data
+ * @param {boolean} rain - Whether rain is active
+ * @param {number}  battery - Current battery percentage
+ * @param {string}  apiKey - Google AI Studio API key
  * @returns {Promise<string|null>}
  */
 export async function getGeminiExplanation(route, rain, battery, apiKey) {
@@ -46,8 +93,8 @@ export async function getGeminiExplanation(route, rain, battery, apiKey) {
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          maxOutputTokens: 100,
-          temperature: 0.5,
+          maxOutputTokens: 120,
+          temperature: 0.7, // Higher temperature for more dynamic responses
         },
       }),
     });
